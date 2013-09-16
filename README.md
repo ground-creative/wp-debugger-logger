@@ -5,7 +5,7 @@ A wordpress plugin for the ptcdebug class to speed up wordpress plugin developme
 
 === INSTALLATION ===
 
-Download a .zip file and place the exgracted folder in the plugins directory of your wordpress installation.
+Download a .zip file and place the extracted folder in the plugins directory of your wordpress installation.
 
 To activate the debugger & logger panel use ?debug=true in the url. 
 
