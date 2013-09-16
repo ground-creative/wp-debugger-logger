@@ -1,5 +1,5 @@
 === PhpToolCase Debugger & Logger ===
-=== Debug Bar ===
+
 Contributors: ifsale
 Tags: debug
 Tested up to: 3.6
@@ -7,6 +7,7 @@ Stable tag: 0.5
 Requires at least: 3.1
 
 A PHP Debugger & Logger to speed up the process of plugin development. 
+
 
 == Description ==
 
@@ -35,9 +36,12 @@ Wiki Pages: https://github.com/ifsale/wp-debugger-logger/wiki
 
 GitHub Repository: https://github.com/ifsale/wp-debugger-logger
 
+Wordpress Repository: http://wordpress.org/plugins/debugger-logger/
+
+
 == Installation ==
 
-Download a .zip file and place the folder debugger-logger in the plugins directory of your wordpress installation.
+Download a .zip file and place the exctracted folder in the plugins directory of your wordpress installation.
 
 To activate the debugger & logger panel use ?debug=true in the url.
 
