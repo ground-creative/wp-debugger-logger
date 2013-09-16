@@ -266,7 +266,14 @@
 		* @param	array	$array		array of values to check
 		* @return	returns true if value is numeric, otherwise false
 		*/
-		public function validateNumber($fieldName,$array){ return @is_numeric(@$array[$fieldName]) ? true : false; }
+		public function validateNumber($fieldName,$array)
+		{ 
+			if($this->validateRequired($fieldName,$array))
+			{
+				return (@is_numeric(@$array[$fieldName])) ? true : false; 
+			}
+			else{ return true; }
+		}
 		/**
 		* Check if value matches other field value
 		* @param	string	$fieldName	the name of the input field

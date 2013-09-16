@@ -1,6 +1,4 @@
 <?
-	// add panel top, right position variables to class ptcdebug
-	
 	class WP_PtcDebug extends PtcDebug
 	{
 		public function __contruct(){ /* do nothing */ }
@@ -88,7 +86,10 @@
 					  PRIMARY KEY (`id`)
 					) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;";
 				$db->executeSql($sql);
-				$db->insertRow($table_name,self::getDefaultOptions());
+				$defaultOptions=self::getDefaultOptions();
+				unset($defaultOptions['panel_right']);
+				unset($defaultOptions['panel_top']);
+				$db->insertRow($table_name,$defaultOptions);
 			}
 		}
 		public static function wpQueries() 
@@ -124,7 +125,8 @@
 			//wp_enqueue_script("jquery-ui","https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"); 
 			wp_enqueue_script("qtipJs","http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.0.0/jquery.qtip.min.js"); 
 			wp_enqueue_script('validatorJs','http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js');
-			wp_enqueue_script('validatorDefaults',plugin_dir_url(dirname(__FILE__)).'/ptc-debugger/js/ptc-forms-validator.js');			
+			wp_enqueue_script('validatorDefaults',plugin_dir_url(dirname(__FILE__)).
+													end(@explode('/',dirname(__FILE__))).'/js/ptc-forms-validator.js');		
 			/*
 			add_action('admin_footer',function()
 			{

@@ -40,10 +40,7 @@
 	add_action('init',array('WP_PtcDebug','load'),0); 
 	
 	register_activation_hook(__FILE__,array('WP_PtcDebug','install'));
-	if(is_admin())
-	{
-		add_action('admin_menu',array('WP_PtcDebug','admin'));
-	}
+	if(is_admin()){ add_action('admin_menu',array('WP_PtcDebug','admin')); }
 	add_action('shutdown',array('WP_PtcDebug','wpQueries'));
 	add_action('activated_plugin',array('WP_PtcDebug','thisPluginFirst'));
 ?>
