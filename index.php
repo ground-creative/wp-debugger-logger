@@ -1,9 +1,9 @@
-<?
+<?php
 	/**
 	* Plugin Name: PhpToolCase Debugger & Logger
 	* Plugin URI: http://phptoolcase.com/guides/ptc-debug-guide.html
-	* Description: A PHP Debugger & Logger to speed up plugins development. Features include: log messages and sql queries, watch for variable changes and time execution. Visit the <a href="http://phptoolcase.com/guides/ptc-debug-guide.html">Home Page</a> for more info.
-	* Version: 0.5
+	* Description: A PHP Debugger & Logger to speed up plugins development. Features include: log messages and sql queries, watch for variable changes and time execution, code coverage analysis to view executed lines. Visit the <a href="http://phptoolcase.com/guides/ptc-debug-guide.html">Home Page</a> for more info.
+	* Version: 0.6
 	* Author: Carlo Pietrobattista
 	* Author URI: http://phptoolcase.com
 	* License: GPL2
@@ -24,6 +24,9 @@
 	    along with this program; if not, write to the Free Software
 	    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 	*/
+
+	// change this for the watch , trace and code coverage utilities according to the environment 
+	declare( ticks = 100 );		// the lower the number, the slower it will take
 	
 	// Make sure we don't expose any info if called directly
 	if(!function_exists('add_action')) 
@@ -33,9 +36,19 @@
 	}
 	
 	// require the handyman component to autoload classes
-	require_once('PhpToolCase/PtcHm.php');		
-	PtcHandyMan::addPath(dirname(__FILE__));
+	require_once('PhpToolCase/PtcHm.php');			
 	
+	use PhpToolCase\PtcHandyMan;
+	
+	PtcHandyMan::addDir(array
+	(
+		dirname(__FILE__),
+		'PhpToolCase'	=>	dirname( __FILE__ ) . '/PhpToolCase' 
+	));
+	PtcHandyMan::addSeparator( '-' );					// wordpress separator for class names
+	PtcHandyMan::addConvention( 'class{SEP}{CLASS}' );	// wordpress name convention for classes
+	PtcHandyMan::register( );						// register the autoloader
+
 	//WP_PtcDebug::load();
 	add_action('init',array('WP_PtcDebug','load'),0); 
 	
@@ -43,4 +56,3 @@
 	if(is_admin()){ add_action('admin_menu',array('WP_PtcDebug','admin')); }
 	add_action('shutdown',array('WP_PtcDebug','wpQueries'));
 	add_action('activated_plugin',array('WP_PtcDebug','thisPluginFirst'));
-?>

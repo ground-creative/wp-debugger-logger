@@ -1,14 +1,18 @@
 <?php
+
 	/**
 	* PHP TOOLCASE HTML FORMS GENERATOR/VALIDATOR CLASS 
-	* PHP version 5
+	* PHP version 5.3
 	* @category 	Libraries
 	* @package  	PhpToolCase
-	* @version	0.8.3
+	* @version	0.9
 	* @author   	Irony <carlo@salapc.com>
 	* @license  	http://www.gnu.org/copyleft/gpl.html GNU General Public License
 	* @link     	http://phptoolcase.com
 	*/
+
+	namespace PhpToolCase;
+
 	class PtcForms
 	{
 		/**
@@ -16,27 +20,33 @@
 		* @param 	array 	$options		see {@link _defaultOptions} for available options
 		* @tutorial	PtcForms.cls#class_options
 		*/
-		public function  __construct($options=null)
-		{
-			$this->_options=(is_array($options)) ? 
-				array_merge($this->_defaultOptions,$options) : $this->_defaultOptions;
-			if($this->_options['keep_values'])
+		public function  __construct( $options = null )
+		{	
+			$namespace = @strtoupper( @str_replace( '\\' , '_' , __NAMESPACE__ ) ) . '_';
+			@define( '_PTCFORMS_' . $namespace , get_called_class( ) ); // declare the class namespace
+			$this->_options = ( is_array( $options ) ) ? 
+				array_merge( $this->_defaultOptions , $options ) : $this->_defaultOptions;
+			if ( $this->_options[ 'keep_values' ] )
 			{
-				$method=$this->_getFormValues();
-				if(!empty($method))
+				$method = $this->_getFormValues( );
+				if ( !empty( $method ) )
 				{
-					foreach(@$method  as $k=>$v)
+					foreach ( @$method  as $k => $v )
 					{
-						if(@preg_match('|_ptcgen|',$k,$matches))
+						if ( @strpos( $k , '_ptcgen' ) )
 						{
-							$arr_key=explode('_',$k);
-							$this->_hiddenValues[$arr_key[0]]=$v;
+							$arr_key = explode( '_' , $k );
+							$this->_hiddenValues[ $arr_key[ 0 ] ] = $v;
 						}
 					}
-					$this->_editFormValues($method);
+					$this->_editFormValues( $method );
 				}
 			}
-			if(!isset($GLOBALS['ptcRandId'])){ $GLOBALS['ptcRandId']=0; }
+			if ( !defined( '_PTC_RANDID_' ) ) 
+			{ 
+				@$_SESSION[ '_PTC_RANDID_' ] = 0; 
+				@define( '_PTC_RANDID_' , 'PhpToolCase Random Id Generator' ); // start counting id's
+			}
 		}
 		/**
 		* Adds a field to the form object
@@ -163,17 +173,16 @@
 			foreach($this->_fields as $k => $arrV){ $fields.=$this->_buildField($k); }
 			$container=str_replace('{fields}',"\n".$fields.$start_tab."\t",$container);
 			$container=str_replace('{form}',$container."\n".$start_tab,$main_container);
-			if(class_exists('PtcDebug',true))
+			/* DEBUGGING */
+			self::_debug($this->_options,$attributes['id'].' form options',$this->_options['debug_category']);
+			self::_debug($this->_fields,$attributes['id'].' form fields',$this->_options['debug_category']);
+			if(@$this->_validate['fields'])
 			{
-				log_msg($this->_options,$attributes['id'].' form options',$this->_options['debug_category']); 
-				log_msg($this->_fields,$attributes['id'].' form fields',$this->_options['debug_category']); 
-				if(@$this->_validate['fields'])
-				{
-					log_msg($this->_validate['fields'],$attributes['id'].' validator config',
-												$this->_options['debug_category']); 
-				}
-				log_msg($this,$attributes['id'].' form object',$this->_options['debug_category']); 
-			}	
+				self::_debug($this->_validate['fields'],$attributes['id'].' validator config',
+												$this->_options['debug_category']);
+			}
+			self::_debug($this,$attributes['id'].' form object',$this->_options['debug_category']);
+			/* END DEBUGGING */
 			if($this->_options['print_form']){ print $container."\n"; }
 			else{ return $container."\n"; }
 		}
@@ -231,10 +240,7 @@
 					$validate['isValid']=false; 
 				}
 				$this->_validate=$validate;
-				if(class_exists('PtcDebug',true))
-				{ 
-					log_msg($this->_validate,'validator result',$this->_options['debug_category']); 
-				}
+				self::_debug($this->_validate,'validator result',$this->_options['debug_category']);
 				return $this->_validate;
 			}
 			trigger_error($signature.' no fields to validate found, quitting now!',$this->_options['err_msg_level']);
@@ -245,9 +251,9 @@
 		* @param	array	$array		array of values to check
 		* @return	returns true if value is not empty, otherwise false
 		*/
-		public function validateRequired($fieldName,$array)
+		public function validateRequired( $fieldName , $array )
 		{ 
-			return (@strlen($array[$fieldName])>0) ? true : false; 
+			return ( @strlen( $array[ $fieldName ] ) > 0 ) ? true : false; 
 		}
 		/**
 		* Check if value is valid email
@@ -255,10 +261,15 @@
 		* @param	array	$array		array of values to check
 		* @return	returns true if value is a correct email, otherwise false
 		*/
-		public function validateEmail($fieldName,$array)
+		public function validateEmail( $fieldName , $array )
 		{
-			$pattern="^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$";// invalid email regex
-			return @eregi($pattern,@$array[$fieldName]) ? true : false; 
+			if ( $this->validateRequired( $fieldName , $array ) )
+			{
+				// invalid email regex
+				$pattern = "^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$";
+				return @eregi( $pattern , @$array[ $fieldName ] ) ? true : false; 
+			}
+			else{ return true; }
 		}
 		/**
 		* Check if value is numeric
@@ -266,11 +277,11 @@
 		* @param	array	$array		array of values to check
 		* @return	returns true if value is numeric, otherwise false
 		*/
-		public function validateNumber($fieldName,$array)
+		public function validateNumber( $fieldName , $array )
 		{ 
-			if($this->validateRequired($fieldName,$array))
+			if ( $this->validateRequired( $fieldName , $array ) )
 			{
-				return (@is_numeric(@$array[$fieldName])) ? true : false; 
+				return ( @is_numeric( @$array[ $fieldName ] ) ) ? true : false; 
 			}
 			else{ return true; }
 		}
@@ -281,9 +292,13 @@
 		* @param	array	$array		array of values to check
 		* @return	returns true if value is equal to other given value, otherwise false
 		*/
-		public function validateEqualTo($fieldName,$matchField,$array)
+		public function validateEqualTo( $fieldName , $matchField , $array )
 		{ 
-			return (@$array[$fieldName]==@$array[$matchField]) ? true : false; 
+			if ( $this->validateRequired( $fieldName , $array ) )
+			{
+				return ( @$array[ $fieldName ] == @$array[ $matchField ] ) ? true : false; 
+			}
+			else{ return true; }
 		}
 		/**
 		* Check if given regex pattern is matched
@@ -292,9 +307,13 @@
 		* @param	array	$array		array of values to check
 		* @return	returns true if value matches the given pattern, otherwise false
 		*/
-		public function validatePattern($fieldName,$pattern,$array)
+		public function validatePattern( $fieldName , $pattern , $array )
 		{ 
-			return @eregi($pattern,@$array[$fieldName]) ? true : false; 
+			if ( $this->validateRequired( $fieldName , $array ) )
+			{
+				return @eregi( $pattern , @$array[ $fieldName ] ) ? true : false; 
+			}
+			else{ return true; }
 		}
 		/**
 		* Alias of {@link customTpls()}
@@ -306,24 +325,24 @@
 		* @see		PtcForms::$_htmlTpls
 		* @tutorial	PtcForms.cls#customTpls
 		*/
-		public function customTpls($templates)
+		public function customTpls( $templates )
 		{
-			$this->_htmlTpls=array_merge($this->_htmlTpls,$templates);
+			$this->_htmlTpls=array_merge( $this->_htmlTpls , $templates );
 		}
 		/**
 		* Alias of {@link addElAttributes()}
 		*/
-		public function addElAttribute($attributes){ $this->addElAttributes($attributes); }
+		public function addElAttribute( $attributes ) { $this->addElAttributes( $attributes ); }
 		/**
 		* Adds attributes to array of attributes for html elements 
 		* @param	array|string	$attributes	array or string to add as attribute/s
 		* @see		$_elAttributes
 		* @tutorial	PtcForms.cls#addFieldAttributes.add_el_attributes
 		*/
-		public function addElAttributes($attributes)
+		public function addElAttributes( $attributes )
 		{
-			$attributes=(@is_array($attributes)) ? $attributes : array($attributes);
-			$this->_elAttributes=array_merge($this->_elAttributes,$attributes);
+			$attributes = ( @is_array( $attributes ) ) ? $attributes : array( $attributes );
+			$this->_elAttributes = array_merge( $this->_elAttributes , $attributes );
 		}
 		/**
 		* Changes label containers default styles
@@ -333,10 +352,11 @@
 		* @see		$_labelStyles
 		* @tutorial	PtcForms.cls#changeDefaultStyles.setLabelStyle		
 		*/
-		public function setLabelStyle($labelStyle,$num,$type=null)
+		public function setLabelStyle( $labelStyle , $num , $type = null )
 		{ 
-			if(!$type){ $type=$this->_options['labels_align']; }
-			$this->_labelStyles[$num][$type]=array_merge($this->_labelStyles[$num][$type],$labelStyle);
+			if ( !$type ) { $type = $this->_options[ 'labels_align' ]; }
+			$this->_labelStyles[ $num ][ $type ] = array_merge( 
+						$this->_labelStyles[ $num ][ $type ] , $labelStyle );
 		}
 		/**
 		* Changes default input fields style
@@ -345,64 +365,67 @@
 		* @see		$_inputStyles	
 		* @tutorial	PtcForms.cls#changeDefaultStyles.setInputStyle
 		*/
-		public function setInputStyle($style,$type){ $this->_inputStyles[$type]=array_merge($this->_inputStyles[$type],$style); }
+		public function setInputStyle( $style , $type )
+		{ 
+			$this->_inputStyles[ $type ] = array_merge( $this->_inputStyles[ $type ] , $style ); 
+		}
 		/**
 		* Class options property, to be merged with {@link $_defaultOptions} property
 		* @var	array
 		* @see		$_defaultOptions
 		*/
-		protected $_options=array();
+		protected $_options = array( );
 		/**
 		* Default options for the class
 		* @var	array
 		* @tutorial	PtcForms.cls#class_options	
 		*/
-		protected $_defaultOptions=array
+		protected $_defaultOptions = array
 		(
 			'form_method'			=>	'post',	// the form method to use
 			'form_action'			=>	'#',		// the form action url
 			'form_width'			=>	'500px',	// the width for the main container
-			'add_class_validator'	=>	false,	// add validator classes to fields for use with jquery
+			'add_class_validator'		=>	false,	// add validator classes to fields for use with jquery
 			'labels_align'			=>	'left',	// align labels globally(left,top,right,none)
 			'labels_width'			=>	'40%',	// the width for labels as a percentage
-			'style_elements'		=>	true,	// add default style to input elements to align properly
+			'style_elements'			=>	true,	// add default style to input elements to align properly
 			'style_labels'			=>	true,	// add default style to label elements to align properly
 			'style_tables'			=>	true,	// add default style to table elements to align properly
-			'spacer_height'		=>	'3px',	// height for the spacer between fields
+			'spacer_height'			=>	'3px',	// height for the spacer between fields
 			'keep_values'			=>	true,	// repopulate filled fields on form submission
-			'print_form'			=>	true,	// print form to screen or return html only
-			'start_tab'			=>	"\t",		// format html code with tabs
+			'print_form'				=>	true,	// print form to screen or return html only
+			'start_tab'				=>	"\t",		// format html code with tabs
 			'err_msg_level'			=>	E_USER_WARNING,	// error messages level
-			'debug_category'		=>	'PtcForms' // default category for the PtcDebug class
+			'debug_category'			=>	'PtcForms' // default category for the PtcDebug class
 		);
 		/**
 		* Html templates property for all elements
 		* @var	array
 		* @tutorial	PtcForms.cls#customTpls
 		*/
-		protected $_htmlTpls=array
+		protected $_htmlTpls = array
 		(
 			'select_option'		=>	'<option {attributes}>{label}</option>',
 			'select'			=>	'<select name="{name}" {attributes}>{options}</select>',
 			'textarea'			=>	'<textarea name="{name}" {attributes}>{value}</textarea>',
 			'input'			=>	'<input type="{type}" name="{name}" {attributes}>',
 			'fieldset'			=>	'<fieldset {attributes}>{label}{data} {start_tab}</fieldset>',
-			'form'			=>	'<form {method} {action} {attributes}>{fields}</form>',
+			'form'				=>	'<form {method} {action} {attributes}>{fields}</form>',
 			'spacer'			=>	'<div style="clear:both;height:{spacerVal}" {id}><!-- --></div>',
-			'label'			=>	'<label {for} {attributes}>{label}</label>',
+			'label'				=>	'<label {for} {attributes}>{label}</label>',
 			'legend'			=>	'<legend {attributes}>{label}</legend>',
-			'span'			=>	'<span {attributes}>{label}</span>',
+			'span'				=>	'<span {attributes}>{label}</span>',
 			'td'				=>	'<td align="left" valign="top">',
 			'table'			=>	'<table {attributes}>',
-			'field_container'	=>	'<div {attributes}>{label}{field} {start_tab}</div>',
-			'main_container'	=>	'<div style="width:{form_width}">{form}</div>'
+			'field_container'		=>	'<div {attributes}>{label}{field} {start_tab}</div>',
+			'main_container'		=>	'<div style="width:{form_width}">{form}</div>'
 		);
 		/**
 		*  Default label styles property
 		*  @var	array
 		* @tutorial	PtcForms.cls#changeDefaultStyles.setLabelStyle
 		*/
-		protected $_labelStyles=array
+		protected $_labelStyles = array
 		(
 			/* Styles for input, select and textarea */
 			1	=>	array('left'=>array('float'=>'left','margin'=>'2px 0 0 0','width'=>'{label_width}%'),//margin:1px 0 0 0
@@ -452,6 +475,11 @@
 		* @var	array
 		*/
 		protected $_hiddenValues=array();
+		/**
+		* Build hidden values property
+		* @var	bool
+		*/
+		protected $_buildHidden=true;
 		/**
 		* Array of fields to validate with the validator engine
 		* @var	array
@@ -1251,7 +1279,7 @@
 		* @param	string	$function		which function called this process
 		* @param	string	$errType		the error type		
 		*/
-		protected function _checkErrors($fieldName,$type,$function=null,$errType=null)
+		protected function _checkErrors($fieldName , $type , $function = null , $errType = null )
 		{
 			$errType=(!$errType) ? $this->_options['err_msg_level'] : $errType;
 			$signature=(!$function) ? __CLASS__.' ' : __CLASS__.'::'.$function.' ';
@@ -1327,11 +1355,20 @@
 		/**
 		* Increases number of random generated id for elements
 		*/
-		protected function _randomId(){ return $GLOBALS['ptcRandId']=($GLOBALS['ptcRandId']+1); }
+		protected function _randomId( ) 
+		{ 
+			return @$_SESSION[ '_PTC_RANDID_' ] = ( @$_SESSION[ '_PTC_RANDID_' ] + 1 ); 
+		}
 		/**
-		* Build hidden values property
-		* @var	bool
+		* Send messsages to the PtcDebug class if present and it\'s namespace
+		* @param 	mixed 	$string		the string to pass
+		* @param 	mixed 	$statement	some statement if required
+		* @param	string	$category	a category for the messages panel
 		*/
-		private $_buildHidden=true;
+		protected static function _debug( $string , $statement = null , $category = null )
+		{
+			if ( !defined( '_PTCDEBUG_NAMESPACE_' ) ) { return false; }
+			return @call_user_func_array( array( '\\' . _PTCDEBUG_NAMESPACE_ , 'bufferLog' ) ,  
+											array( $string , $statement , $category )  );
+		}
 	}
-?>

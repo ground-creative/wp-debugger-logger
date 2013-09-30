@@ -3,7 +3,7 @@
 Contributors: ifsale
 Tags: debug
 Tested up to: 3.6
-Stable tag: 0.5
+Stable tag: 0.6
 Requires at least: 3.1
 
 A PHP Debugger & Logger to speed up the process of plugin development. 
@@ -25,6 +25,8 @@ Main Features:
 * Dumps of all types of variable
 * File inspector with code highlighter to view source code
 * Sends messages to js console(Chrome only) for ajax scripts
+* Code coverage analysis to check which lines of script where executed
+* Function calls tracing
 
 When WP_DEBUG is enabled the default php error handler can be replaced..
 
@@ -46,3 +48,14 @@ Download a .zip file and place the exctracted folder in the plugins directory of
 To activate the debugger & logger panel use ?debug=true in the url.
 
 Visit http://phptoolcase.com/guides/ptc-debug-guide.html for user guides and api documentation.
+
+
+== Changelog ==
+
+= 0.6 =
+Added namespaces to all classes but the main debugger class to be able to use the functions in the globlal scope,
+and prevent other plugins from using the library in the global scope, in case they use other versions,
+Updated the library to the newer version
+
+= 0.5 =
+First realease for the plugin
