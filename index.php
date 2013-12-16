@@ -29,30 +29,44 @@
 	declare( ticks = 100 );		// the lower the number, the slower it will take
 	
 	// Make sure we don't expose any info if called directly
-	if(!function_exists('add_action')) 
+	if ( !function_exists( 'add_action' ) ) 
 	{
 		echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
 		exit;
 	}
 	
 	// require the handyman component to autoload classes
-	require_once('PhpToolCase/PtcHm.php');			
-	
+	require_once( 'PhpToolCase/PtcHm.php' );			
+
 	use PhpToolCase\PtcHandyMan;
+	use PhpToolCase\PtcDb;
 	
-	PtcHandyMan::addDir(array
+	PtcHandyMan::addDirs( array
 	(
-		dirname(__FILE__),
-		'PhpToolCase'	=>	dirname( __FILE__ ) . '/PhpToolCase' 
-	));
-	PtcHandyMan::addSeparator( '-' );					// wordpress separator for class names
-	PtcHandyMan::addConvention( 'class{SEP}{CLASS}' );	// wordpress name convention for classes
-	PtcHandyMan::register( );						// register the autoloader
+		dirname( __FILE__ ) ,
+		'PhpToolCase'	=>	dirname(  __FILE__ ) . '/PhpToolCase' ,
+		'PtcDebug'	=>   dirname( __FILE__ )
+	) );
+	
+	PtcHandyMan::addSeparator( '-' );						// wordpress separator for class names
+	PtcHandyMan::addConvention( 'class{SEP}{CLASS}' );		// wordpress name convention for classes
+	PtcHandyMan::register( );							// register the autoloader
+
+	// add the db connection
+	PtcDb::add( array
+	(
+		'name'				=>	DB_USER ,
+		'pass'				=>	DB_PASSWORD ,
+		'db'					=>	DB_NAME ,
+		'query_builder'			=>	true ,
+		'query_builder_class'	=>	'PhpToolCase\PtcQueryBuilder'
+	) );
 
 	//WP_PtcDebug::load();
-	add_action('init',array('WP_PtcDebug','load'),0); 
+	add_action( 'init' , array( 'WP_PtcDebug' , 'load' ) , 0 ); 
 	
-	register_activation_hook(__FILE__,array('WP_PtcDebug','install'));
-	if(is_admin()){ add_action('admin_menu',array('WP_PtcDebug','admin')); }
-	add_action('shutdown',array('WP_PtcDebug','wpQueries'));
-	add_action('activated_plugin',array('WP_PtcDebug','thisPluginFirst'));
+	register_activation_hook( __FILE__ , array( 'WP_PtcDebug' , 'install' ) );
+	if ( is_admin( ) ){ add_action( 'admin_menu' , array( 'WP_PtcDebug' , 'admin' ) ); }
+	add_action( 'shutdown' , array( 'WP_PtcDebug' , 'wpQueries' ) );
+	add_action( 'activated_plugin', array( 'WP_PtcDebug' , 'thisPluginFirst' ) );
+	

@@ -3,7 +3,7 @@
 Contributors: ifsale
 Tags: debug
 Tested up to: 3.6
-Stable tag: 0.6
+Stable tag: 0.7
 Requires at least: 3.1
 
 A PHP Debugger & Logger to speed up the process of plugin development. 
@@ -27,6 +27,7 @@ Main Features:
 * Sends messages to js console(Chrome only) for ajax scripts
 * Code coverage analysis to check which lines of script where executed
 * Function calls tracing
+* Can search files for a string recursively
 
 When WP_DEBUG is enabled the default php error handler can be replaced..
 
@@ -51,6 +52,10 @@ Visit http://phptoolcase.com/guides/ptc-debug-guide.html for user guides and api
 
 
 == Changelog ==
+
+= 0.7 =
+Upgraded the plugin to the new library version
+Added event listeners for the admin options form.
 
 = 0.6 =
 Added namespaces to all classes but the main debugger class to be able to use the functions in the globlal scope,
