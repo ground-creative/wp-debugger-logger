@@ -3,7 +3,7 @@
 	* Plugin Name: PhpToolCase Debugger & Logger
 	* Plugin URI: http://phptoolcase.com/guides/ptc-debug-guide.html
 	* Description: A PHP Debugger & Logger to speed up plugins development. Features include: log messages and sql queries, watch for variable changes and time execution, code coverage analysis to view executed lines. Visit the <a href="http://phptoolcase.com/guides/ptc-debug-guide.html">Home Page</a> for more info.
-	* Version: 0.6
+	* Version: 0.7
 	* Author: Carlo Pietrobattista
 	* Author URI: http://phptoolcase.com
 	* License: GPL2
